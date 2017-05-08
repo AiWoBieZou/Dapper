@@ -1,26 +1,26 @@
-Dapper - a simple object mapper for .Net
+Dapper - .Net的一个简单对象映射器
 ========================================
 [![Build status](https://ci.appveyor.com/api/projects/status/8rbgoxqio76ynj4h?svg=true)](https://ci.appveyor.com/project/StackExchange/dapper)
 
-Release Notes
+发行说明
 -------------
 
 [Located at stackexchange.github.io/Dapper](https://stackexchange.github.io/Dapper/)
 
 
-Features
+特征
 --------
-Dapper is a [NuGet library](https://www.nuget.org/packages/Dapper) that you can add in to your project that will extend your `IDbConnection` interface.
+Dapper 是一个 [NuGet 库](https://www.nuget.org/packages/Dapper) 可以添加到您的项目中，这可以扩展 `IDbConnection` 接口.
 
-It provides 3 helpers:
+他提供了三个帮助:
 
-Execute a query and map the results to a strongly typed List
+执行查询并将结果映射到强类型列表
 ------------------------------------------------------------
 
 ```csharp
 public static IEnumerable<T> Query<T>(this IDbConnection cnn, string sql, object param = null, SqlTransaction transaction = null, bool buffered = true)
 ```
-Example usage:
+使用示例:
 
 ```csharp
 public class Dog
@@ -46,15 +46,15 @@ dog.First().Id
     .IsEqualTo(guid);
 ```
 
-Execute a query and map it to a list of dynamic objects
+执行查询并将其映射到动态对象列表
 -------------------------------------------------------
 
 ```csharp
 public static IEnumerable<dynamic> Query (this IDbConnection cnn, string sql, object param = null, SqlTransaction transaction = null, bool buffered = true)
 ```
-This method will execute SQL and return a dynamic list.
+此方法将执行SQL并返回动态列表。
 
-Example usage:
+使用示例:
 
 ```csharp
 var rows = connection.Query("select 1 A, 2 B union all select 3, 4");
@@ -72,14 +72,14 @@ var rows = connection.Query("select 1 A, 2 B union all select 3, 4");
     .IsEqualTo(4);
 ```
 
-Execute a Command that returns no results
+执行不返回结果的命令
 -----------------------------------------
 
 ```csharp
 public static int Execute(this IDbConnection cnn, string sql, object param = null, SqlTransaction transaction = null)
 ```
 
-Example usage:
+使用示例:
 
 ```csharp
 connection.Execute(@"
@@ -93,38 +93,38 @@ connection.Execute(@"
    .IsEqualTo(2);
 ```
 
-Execute a Command multiple times
+执行命令多次
 --------------------------------
 
-The same signature also allows you to conveniently and efficiently execute a command multiple times (for example to bulk-load data)
+相同的签名还允许您方便有效地执行命令多次（例如批量加载数据）
 
-Example usage:
+使用示例:
 
 ```csharp
 connection.Execute(@"insert MyTable(colA, colB) values (@a, @b)",
     new[] { new { a=1, b=1 }, new { a=2, b=2 }, new { a=3, b=3 } }
   ).IsEqualTo(3); // 3 rows inserted: "1,1", "2,2" and "3,3"
 ```
-This works for any parameter that implements IEnumerable<T> for some T.
+这适用于为某些T实现IEnumerable<T>的任何参数。
 
-Performance
+性能
 -----------
 
-A key feature of Dapper is performance. The following metrics show how long it takes to execute 500 SELECT statements against a DB and map the data returned to objects.
+Dapper的一个关键特性是性能。以下指标显示对DB执行500 SELECT语句所需的时间，并映射返回到对象的数据。
 
-The performance tests are broken in to 3 lists:
+性能测试分为3个列表:
 
-- POCO serialization for frameworks that support pulling static typed objects from the DB. Using raw SQL.
-- Dynamic serialization for frameworks that support returning dynamic lists of objects.
-- Typical framework usage. Often typical framework usage differs from the optimal usage performance wise. Often it will not involve writing SQL.
+- 支持从DB拉取静态类型对象的框架的POCO序列化。使用原始SQL.
+- 支持返回对象动态列表的框架的动态序列化.
+- 典型的框架使用。典型的框架使用通常与最佳使用性能不同。通常它不会涉及编写SQL.
 
-### Performance of SELECT mapping over 500 iterations - POCO serialization
+### 500次迭代的SELECT映射的性能--POCO序列化
 
 <table>
   <tr>
-  	<th>Method</th>
-		<th>Duration</th>		
-		<th>Remarks</th>
+  	<th>方法</th>
+		<th>持续时间</th>		
+		<th>备注</th>
 	</tr>
 	<tr>
 		<td>Hand coded (using a <code>SqlDataReader</code>)</td>
@@ -165,7 +165,7 @@ The performance tests are broken in to 3 lists:
 	</tr>
 </table>
 
-### Performance of SELECT mapping over 500 iterations - dynamic serialization
+### 500次迭代的SELECT映射的性能 - 动态序列化
 
 <table>
 	<tr>
@@ -189,7 +189,7 @@ The performance tests are broken in to 3 lists:
 </table>
 
 
-### Performance of SELECT mapping over 500 iterations - typical usage
+### 超过500次迭代的SELECT映射的性能 - 典型用法
 
 <table>
 	<tr>
@@ -224,50 +224,50 @@ The performance tests are broken in to 3 lists:
 	</tr>
 </table>
 
-Performance benchmarks are available [here](https://github.com/StackExchange/dapper-dot-net/blob/master/Dapper.Tests.Performance/PerformanceTests.cs).
+性能可以查看 [这里](https://github.com/StackExchange/dapper-dot-net/blob/master/Dapper.Tests.Performance/PerformanceTests.cs).
 
-Feel free to submit patches that include other ORMs - when running benchmarks, be sure to compile in Release and not attach a debugger (ctrl F5).
+随时提交包含其他ORM的修补程序 - 运行基准时，请确保在Release中编译，而不是附加调试器（ctrl F5）。
 
 Alternatively, you might prefer Frans Bouma's [RawDataAccessBencher](https://github.com/FransBouma/RawDataAccessBencher) test suite or [OrmBenchmark](https://github.com/InfoTechBridge/OrmBenchmark).
 
-Parameterized queries
+参数化查询
 ---------------------
 
-Parameters are passed in as anonymous classes. This allow you to name your parameters easily and gives you the ability to simply cut-and-paste SQL snippets and run them in Query analyzer.
+参数作为匿名类传递。这允许您轻松地命名参数，并使您能够简单地剪切并粘贴SQL代码段并在查询分析器中运行它们。
 
 ```csharp
 new {A = 1, B = "b"} // A will be mapped to the param @A, B to the param @B 
 ```
 
-List Support
+列表支持
 ------------
-Dapper allows you to pass in IEnumerable<int> and will automatically parameterize your query.
+Dapper 允许您传入IEnumerable并自动参数化查询。
 
-For example:
+例如:
 
 ```csharp
 connection.Query<int>("select * from (select 1 as Id union all select 2 union all select 3) as X where Id in @Ids", new { Ids = new int[] { 1, 2, 3 } });
 ```
 
-Will be translated to:
+将被翻译成:
 
 ```csharp
 select * from (select 1 as Id union all select 2 union all select 3) as X where Id in (@Ids1, @Ids2, @Ids3)" // @Ids1 = 1 , @Ids2 = 2 , @Ids2 = 3
 ```
 
-Buffered vs Unbuffered readers
+缓冲与无缓冲 的读取
 ---------------------
-Dapper's default behavior is to execute your sql and buffer the entire reader on return. This is ideal in most cases as it minimizes shared locks in the db and cuts down on db network time.
+Dapper的默认行为是执行您的sql并在返回时缓冲整个阅读器。这在大多数情况下是理想的，因为它可以最小化数据库中的共享锁并减少数据库网络时间。
 
-However when executing huge queries you may need to minimize memory footprint and only load objects as needed. To do so pass, buffered: false into the Query method.
+但是，当执行大量查询时，您可能需要最小化内存占用，并且只需要根据需要加载对象。要做到这一点，通过缓冲：false进入Query方法。
 
-Multi Mapping
+多重映射
 ---------------------
-Dapper allows you to map a single row to multiple objects. This is a key feature if you want to avoid extraneous querying and eager load associations.
+Dapper 允许您将单个行映射到多个对象。如果您想避免无关的查询和热切的负载关联，这是一个关键功能。
 
-Example:
+例如:
 
-Consider 2 classes: `Post` and `User`
+有 2 类: `Post` 和 `User`
 
 ```csharp
 class Post
@@ -285,21 +285,21 @@ class User
 }
 ```
 
-Now let us say that we want to map a query that joins both the posts and the users table. Until now if we needed to combine the result of 2 queries, we'd need a new object to express it but it makes more sense in this case to put the `User` object inside the `Post` object.
+现在让我们说，我们要映射一个加入posts和users表的查询。直到现在，如果我们需要结合2个查询的结果，我们需要一个新的对象来表达它，但是在这种情况下，将 `User` 对象放在 `Post` 对象中更有意义。
 
-This is the user case for multi mapping. You tell dapper that the query returns a `Post` and a `User` object and then give it a function describing what you want to do with each of the rows containing both a `Post` and a `User` object. In our case, we want to take the user object and put it inside the post object. So we write the function: 
+这是用于多映射的用例。你告诉短小精悍该查询返回`Post`和`User`对象，然后给它描述要与每个含有一个行做什么的功能`Post`和`User`对象。在我们的例子中，我们想把用户对象放在`post`对象中。所以我们写功能：
 
 ```csharp
 (post, user) => { post.Owner = user; return post; }
 ```
 
-The 3 type arguments to the `Query` method specify what objects dapper should use to deserialize the row and what is going to be returned. We're going to interpret both rows as a combination of `Post` and `User` and we're returning back a `Post` object. Hence the type declaration becomes
+该`Query`方法的3类参数指定dapper应使用什么对象反序列化行以及将要返回的对象。我们要将两行解释为一个组合`Post`，`User`并且我们返回一个`Post`对象。因此，类型声明变为
 
 ```csharp
 <Post, User, Post>
 ```
 
-Everything put together, looks like this:
+一切都放在一起，看起来像这样：
 
 ```csharp
 var sql = 
@@ -316,13 +316,13 @@ post.Owner.Name.IsEqualTo("Sam");
 post.Owner.Id.IsEqualTo(99);
 ```
 
-Dapper is able to split the returned row by making an assumption that your Id columns are named `Id` or `id`. If your primary key is different or you would like to split the row at a point other than `Id`, use the optional `splitOn` parameter.
+Dapper可以通过假设您的`Id`列命名`Id`或拆分返回的行`id`。如果您的主键不同，或者您想在除了其他位置之外分割行`Id`，请使用可选`splitOn`参数。
 
-Multiple Results
+多个结果
 ---------------------
-Dapper allows you to process multiple result grids in a single query.
+Dapper 允许您在单个查询中处理多个结果网格。
 
-Example:
+例如:
 
 ```csharp
 var sql = 
@@ -340,16 +340,16 @@ using (var multi = connection.QueryMultiple(sql, new {id=selectedId}))
 } 
 ```
 
-Stored Procedures
+存储程序
 ---------------------
-Dapper fully supports stored procs:
+Dapper完全支持存储过程：
 
 ```csharp
 var user = cnn.Query<User>("spGetUser", new {Id = 1}, 
         commandType: CommandType.StoredProcedure).SingleOrDefault();
 ```
 
-If you want something more fancy, you can do:
+如果你想要更多的东西，你可以做：
 
 ```csharp
 var p = new DynamicParameters();
@@ -363,22 +363,22 @@ int b = p.Get<int>("@b");
 int c = p.Get<int>("@c"); 
 ```
 
-Ansi Strings and varchar
+Ansi字符串和varchar
 ---------------------
-Dapper supports varchar params, if you are executing a where clause on a varchar column using a param be sure to pass it in this way:
+Dapper支持varchar参数，如果您使用param执行varchar列上的where子句，请务必以此方式传递：
 
 ```csharp
 Query<Thing>("select * from Thing where Name = @Name", new {Name = new DbString { Value = "abcde", IsFixedLength = true, Length = 10, IsAnsi = true });
 ```
 
-On SQL Server it is crucial to use the unicode when querying unicode and ansi when querying non unicode.
+在SQL Server上，当查询unicode时查询unicode和ansi时，使用unicode至关重要。
 
-Type Switching Per Row
+类型每行切换
 ---------------------
 
-Usually you'll want to treat all rows from a given table as the same data type. However, there are some circumstances where it's useful to be able to parse different rows as different data types. This is where `IDataReader.GetRowParser` comes in handy.
+通常，您需要将给定表中的所有行都视为相同的数据类型。然而，在某些情况下，能够将不同的行解析为不同的数据类型是有用的。这是在哪里`IDataReader.GetRowParser`派上用场。
 
-Imagine you have a database table named "Shapes" with the columns: `Id`, `Type`, and `Data`, and you want to parse its rows into `Circle`, `Square`, or `Triangle` objects based on the value of the Type column.
+想象一下，你有一个名为“形状”与列的数据库表：`Id`，`Type`，和`Data`，你想它的行解析成`Circle`，`Square`或者`Triangle`基于类型列的值对象。
 
 ```csharp
 var shapes = new List<IShape>();
@@ -417,23 +417,23 @@ using (var reader = connection.ExecuteReader("select * from Shapes"))
 }
 ```
 
-Limitations and caveats
+限制和注意事项
 ---------------------
-Dapper caches information about every query it runs, this allow it to materialize objects quickly and process parameters quickly. The current implementation caches this information in a ConcurrentDictionary object. The objects it stores are never flushed. If you are generating SQL strings on the fly without using parameters it is possible you will hit memory issues. We may convert the dictionaries to an LRU Cache.
+Dapper缓存关于它运行的每个查询的信息，这样可以快速实现对象并快速处理参数。当前的实现将此信息缓存在ConcurrentDictionary对象中。它存储的对象不会被刷新。如果您不使用参数即时生成SQL字符串，则可能会遇到内存问题。我们可以将字典转换为LRU缓存。
 
-Dapper's simplicity means that many feature that ORMs ship with are stripped out. It worries  about the 95% scenario, and gives you the tools you need most of the time. It doesn't attempt to solve every problem.
+Dapper的简单意味着ORM的许多功能都被剥离。它担心95％的情况，并为您提供大部分时间需要的工具。它不试图解决每个问题。
 
-Will Dapper work with my DB provider?
+Dapper会与我的DB提供商一起工作吗？
 ---------------------
-Dapper has no DB specific implementation details, it works across all .NET ADO providers including [SQLite](http://www.sqlite.org/), SQL CE, Firebird, Oracle, MySQL, PostgreSQL and SQL Server.
+Dapper没有具体的DB实现细节，它适用于所有.NET ADO提供程序，包括SQLite，SQL CE，Firebird，Oracle，MySQL，PostgreSQL和SQL Server。
 
-Do you have a comprehensive list of examples?
+你有全面的例子列表吗？
 ---------------------
-Dapper has a comprehensive test suite in the [test project](https://github.com/StackExchange/dapper-dot-net/blob/master/Dapper.Tests)
+Dapper 有一个全面的测试项目在 [test project](https://github.com/StackExchange/dapper-dot-net/blob/master/Dapper.Tests)
 
-Who is using this?
+谁在使用这个？
 ---------------------
-Dapper is in production use at:
+Dapper在生产中使用：
 
 [Stack Overflow](https://stackoverflow.com/), [helpdesk](https://www.jitbit.com/web-helpdesk/)
 
